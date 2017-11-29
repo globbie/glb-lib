@@ -20,13 +20,14 @@ def putc(ch):
     sys.stdout.write(ch)
 
 
-def process_task():
+def process_task(in_change = False):
+    set_tag = "__set__"
+    set_state = -1
+
     in_field = False
     in_tag = False
     in_value = False
     in_terminal_value = False
-
-    __set__ = -1
 
     while True:
         ch = getc()
@@ -38,7 +39,6 @@ def process_task():
                 putc(ch)
         elif ch == '{':
             if not in_field:
-                #putc('{')
                 in_field = True
                 assert in_tag == False
                 assert in_value == False
@@ -46,20 +46,21 @@ def process_task():
                 continue
             assert in_field and not in_tag and in_value and not in_terminal_value
             ungetc('{')
-            process_task()
-            putc('}')
+            process_task(in_change or (set_state == len(set_tag)))
+            if set_state != len(set_tag): putc('}' if not in_change else ')')
             in_field = False
             assert in_tag == False
             in_value = False
             assert in_terminal_value == False
         elif ch == '"':
             if in_field and not in_tag and not in_value:
+                set_state = 0
                 # in_field == True
                 in_tag = True
                 # in_value == False
                 assert in_terminal_value == False
             elif in_field and in_tag:
-                putc(' ')
+                if set_state != len(set_tag): putc(' ')
                 # in_field == True
                 in_tag = False
                 assert in_value == False
@@ -70,7 +71,7 @@ def process_task():
                 # in_value == True
                 in_terminal_value = True
             elif in_field and in_value and in_terminal_value:
-                putc('}')
+                putc('}' if not in_change else ')')
                 in_field = False
                 assert in_tag == False
                 in_value = False
@@ -81,7 +82,7 @@ def process_task():
             assert in_value == False; in_value = True
             assert in_terminal_value == False
         elif ch == ',':
-            putc(' '); putc('{')
+            putc(' ')
             assert in_field == False; in_field = True
             assert in_tag == False
             assert in_value == False
@@ -93,7 +94,17 @@ def process_task():
             assert in_terminal_value == False
             return
         else:
-            if in_tag or in_terminal_value:
+            if in_tag:
+                if set_state != -1:
+                    if set_state < len(set_tag) and ch == set_tag[set_state]:
+                        set_state += 1
+                    else:
+                        putc('{' if not in_change else '(')
+                        putc(set_tag[:set_state]); putc(ch)
+                        set_state = -1
+                else:
+                    putc(ch)
+            elif in_terminal_value:
                 putc(ch)
 
 process_task()
