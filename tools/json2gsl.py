@@ -20,13 +20,9 @@ def putc(ch):
     sys.stdout.write(ch)
 
 
-def process_task(in_change = False):
-    set_tag = "__set__"
-    set_state = -1
-    seq_tag = "__seq__"
-    seq_state = -1
+def process_task(in_change = False, tag = None):
+    in_place = tag == None
 
-    in_field = False
     in_tag = False
     in_value = False
     in_terminal_value = False
@@ -35,93 +31,75 @@ def process_task(in_change = False):
         ch = getc()
         if ch == '': sys.exit(0)
 
+        assert not in_tag or not in_value
+        if in_terminal_value: assert in_value
+
         if ch.isspace():
             assert not in_tag, "error: tag contains spaces"
             if in_terminal_value:
                 putc(ch)
         elif ch == '{':
-            if not in_field:
-                in_field = True
-                assert in_tag == False
-                assert in_value == False
-                assert in_terminal_value == False
+            if not in_value:
+                # Starting opening { brace.  Ignore it or print the passed |tag|
+                if not in_place:
+                    putc('{' if not in_change else '(')
+                    for ch_ in tag: putc(ch_)
+                    putc(' ')
                 continue
-            assert in_field and not in_tag and in_value and not in_terminal_value
             ungetc('{')
-            process_task(in_change or (set_state == len(set_tag)))
-            if set_state != len(set_tag): putc('}' if not in_change else ')')
-            in_field = False
+            assert tag != '__set__' or not in_change
+            process_task(in_change = in_change if tag != '__set__' else True,
+                         tag = tag if tag != '__set__' else None)
             assert in_tag == False
-            in_value = False
+            assert in_value == True; in_value = False
             assert in_terminal_value == False
+        elif ch == '[':
+            assert in_value
+            process_task(in_change = in_change)
+            putc('}' if not in_change else ')')
+            break
         elif ch == '"':
-            if in_field and not in_tag and not in_value:
-                set_state = 0; seq_state = 0
-                # in_field == True
+            if not in_tag and not in_value:
+                tag = ""
                 in_tag = True
                 # in_value == False
                 assert in_terminal_value == False
-            elif in_field and in_tag:
-                if set_state != len(set_tag) and seq_state != len(seq_tag): putc(' ')
-                # in_field == True
+            elif in_tag:
+                # |tag| contains the field's tag
                 in_tag = False
                 assert in_value == False
                 assert in_terminal_value == False
-            elif in_field and in_value and not in_terminal_value:
-                # in_field == True
+            elif in_value and not in_terminal_value:
+                putc('{' if not in_change else '(')
+                for ch_ in tag: putc(ch_)
+                putc(' ')
                 assert in_tag == False
                 # in_value == True
                 in_terminal_value = True
-            elif in_field and in_value and in_terminal_value:
+            elif in_value and in_terminal_value:
                 putc('}' if not in_change else ')')
-                in_field = False
                 assert in_tag == False
                 in_value = False
                 in_terminal_value = False
         elif ch == ':':
-            assert in_field == True
             assert in_tag == False
             assert in_value == False; in_value = True
             assert in_terminal_value == False
         elif ch == ',':
             putc(' ')
-            assert in_field == False; in_field = True
             assert in_tag == False
             assert in_value == False
             assert in_terminal_value == False
         elif ch == '}':
-            assert in_field == False
+            if not in_place:
+                putc('}' if not in_change else ')')
             assert in_tag == False
             assert in_value == False
             assert in_terminal_value == False
             return
         else:
             if in_tag:
-                if set_state != -1 or seq_state != -1:
-                    pending = None
-                    print_pending = True
-                    if set_state != -1:
-                        if set_state < len(set_tag) and ch == set_tag[set_state]:
-                            pending = None
-                            print_pending = False
-                            set_state += 1
-                        else:
-                            pending = set_tag[:set_state]
-                            set_state = -1
-                    if seq_state != -1:
-                        if seq_state < len(seq_tag) and ch == seq_tag[seq_state]:
-                            pending = None
-                            print_pending = False
-                            seq_state += 1
-                        else:
-                            pending = seq_tag[:seq_state]
-                            seq_state = -1
-                    if print_pending and pending != None:
-                        putc('{' if not in_change else '(')
-                        for ch_ in pending: putc(ch_)
-                        putc(ch) # priint
-                else:
-                    putc(ch)
+                tag += ch
             elif in_terminal_value:
                 putc(ch)
 
