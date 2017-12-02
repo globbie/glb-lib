@@ -20,6 +20,29 @@ def putc(ch):
     sys.stdout.write(ch)
 
 
+def process_task_array(in_change = False, tag = None):
+    in_place = tag == None
+
+    while True:
+        ch = getc()
+        if ch == '': sys.exit(1)
+
+        if ch.isspace():
+            pass
+        elif ch == '[':
+            if not in_place:
+                putc('[')
+                for ch_ in tag: putc(ch_)
+                putc(' ')
+            process_task(in_change = in_change, tag = None)
+        elif ch == ',':
+            putc(' ')
+            process_task(in_change = in_change, tag = None)
+        elif ch == ']':
+            if not in_place:
+                putc(']')
+            return
+
 def process_task(in_change = False, tag = None):
     in_place = tag == None
 
@@ -54,10 +77,12 @@ def process_task(in_change = False, tag = None):
             assert in_value == True; in_value = False
             assert in_terminal_value == False
         elif ch == '[':
-            assert in_value
-            process_task(in_change = in_change)
-            putc('}' if not in_change else ')')
-            break
+            ungetc('[')
+            process_task_array(in_change = in_change,
+                               tag = tag if tag != '__seq__' else None)
+            assert in_tag == False
+            assert in_value == True; in_value = False
+            assert in_terminal_value == False
         elif ch == '"':
             if not in_tag and not in_value:
                 tag = ""
