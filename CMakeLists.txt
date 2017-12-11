@@ -16,8 +16,10 @@ set(CMAKE_C_FLAGS_PACKAGE "${CMAKE_C_FLAGS_RELEASE}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/glb-lib")
 
 add_library(glb-lib-common OBJECT src/glb_output.c)
+add_library(glb-lib-json-converter OBJECT src/json-converter/glb_json_to_gsl.c)
 add_library(glb-lib-list OBJECT src/list/list.c)
 
 add_library(glb-lib SHARED
     $<TARGET_OBJECTS:glb-lib-common>
+    $<TARGET_OBJECTS:glb-lib-json-converter>
     $<TARGET_OBJECTS:glb-lib-list>)

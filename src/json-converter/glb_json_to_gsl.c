@@ -1,20 +1,20 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
+#include "glb_json_converter.h"
+
+#include "glb_config.h"
+
 #include <assert.h>
+#include <stddef.h>
+#include <string.h>
 
-#include <ctype.h>
-#include <stdlib.h>
+static int process_task(const char **rec, const char *rec_end,
+                        bool in_change, const char *tag, size_t tag_size,
+                        struct glbOutput *output);
 
-int glb_json_to_gsl(const char *json, size_t json_size, char *out, size_t *out_size) {
-  return 0;
-}
-
-int process_task(const char **rec, const char *rec_end,
-                 bool in_change, const char *tag, size_t tag_size);
-
-static int process_task_array(const char **rec, const char *rec_end,
-                              bool in_change, const char *tag, size_t tag_size) {
+static int
+process_task_array(const char **rec, const char *rec_end,
+                   bool in_change, const char *tag, size_t tag_size,
+                   struct glbOutput *output)
+{
     bool in_place = tag_size == 0;
 
     const char *c = *rec;
@@ -27,21 +27,21 @@ static int process_task_array(const char **rec, const char *rec_end,
             break;
         case '[':
             if (!in_place) {
-                putc('[', stdout);
-                for (size_t i = 0; i < tag_size; ++i) putc(tag[i], stdout);
-                putc(' ', stdout);
+                output->putc(output, '[');
+                output->write(output, tag, tag_size);
+                output->putc(output, ' ');
             }
             c++;
-            process_task(&c, rec_end, in_change, NULL, 0);
+            process_task(&c, rec_end, in_change, NULL, 0, output);
             break;
         case ',':
-            putc(' ', stdout);
+            output->putc(output, ' ');
             c++;
-            process_task(&c, rec_end, in_change, NULL, 0);
+            process_task(&c, rec_end, in_change, NULL, 0, output);
             break;
         case ']':
             if (!in_place)
-                putc(']', stdout);
+                output->putc(output, ']');
             goto out;
         }
     }
@@ -51,8 +51,11 @@ out:
     return 0;
 }
 
-int process_task(const char **rec, const char *rec_end,
-                 bool in_change, const char *tag, size_t tag_size) {
+static int
+process_task(const char **rec, const char *rec_end,
+             bool in_change, const char *tag, size_t tag_size,
+             struct glbOutput *output)
+{
     bool in_place = tag_size == 0;
 
     bool in_tag = false;
@@ -71,22 +74,23 @@ int process_task(const char **rec, const char *rec_end,
         case ' ':
             assert(!in_tag && "error: tag contains spaces");
             if (in_terminal_value)
-                putc(*c, stdout);
+                output->putc(output, *c);
             break;
         case '{': {
             if (!in_value) {
                 // Starting opening \{ brace.  Ignore it or print the passed |tag|
                 if (!in_place) {
-                    putc(!in_change ? '{' : '(', stdout);
-                    for (size_t i = 0; i < tag_size; ++i) putc(tag[i], stdout);
-                    putc(' ', stdout);
+                    output->putc(output, !in_change ? '{' : '(');
+                    output->write(output, tag, tag_size);
+                    output->putc(output, ' ');
                 }
                 continue;
             }
             bool tag_is_set = tag_size == strlen("__set__") && !memcmp(tag, "__set__", tag_size);
             assert(!tag_is_set || !in_change);
             process_task(&c, rec_end, !tag_is_set ? in_change : true,
-                         !tag_is_set ? tag : NULL, !tag_is_set ? tag_size : 0);
+                         !tag_is_set ? tag : NULL, !tag_is_set ? tag_size : 0,
+                         output);
             assert(in_tag == false);
             assert(in_value == true); in_value = false;
             assert(in_terminal_value == false);
@@ -96,7 +100,8 @@ int process_task(const char **rec, const char *rec_end,
             bool tag_is_seq = tag_size == strlen("__seq__") && !memcmp(tag, "__seq__", tag_size);
             process_task_array(&c, rec_end, in_change,
                                !tag_is_seq ? tag : NULL,
-                               !tag_is_seq ? tag_size : 0);
+                               !tag_is_seq ? tag_size : 0,
+                               output);
             assert(in_tag == false);
             assert(in_value == true); in_value = false;
             assert(in_terminal_value == false);
@@ -117,15 +122,15 @@ int process_task(const char **rec, const char *rec_end,
                 assert(in_terminal_value == false);
             }
             else if (in_value && !in_terminal_value) {
-                putc(!in_change ? '{' : '(', stdout);
-                for (size_t i = 0; i < tag_size; ++i) putc(tag[i], stdout);
-                putc(' ', stdout);
+                output->putc(output, !in_change ? '{' : '(');
+                output->write(output, tag, tag_size);
+                output->putc(output, ' ');
                 assert(in_tag == false);
                 // in_value == true
                 in_terminal_value = true;
             }
             else if (in_value && in_terminal_value) {
-                putc(!in_change ? '}' : ')', stdout);
+                output->putc(output, !in_change ? '}' : ')');
                 assert(in_tag == false);
                 in_value = false;
                 in_terminal_value = false;
@@ -137,14 +142,14 @@ int process_task(const char **rec, const char *rec_end,
             assert(in_terminal_value == false);
             break;
         case ',':
-            putc(' ', stdout);
+            output->putc(output, ' ');
             assert(in_tag == false);
             assert(in_value == false);
             assert(in_terminal_value == false);
             break;
         case '}':
             if (!in_place)
-                putc(!in_change ? '}' : ')', stdout);
+                output->putc(output, !in_change ? '}' : ')');
             assert(in_tag == false);
             assert(in_value == false);
             assert(in_terminal_value == false);
@@ -153,7 +158,7 @@ int process_task(const char **rec, const char *rec_end,
             if (in_tag)
                 tag_size++;
             else if (in_terminal_value)
-                putc(*c, stdout);
+                output->putc(output, *c);
             break;
         }
     }
@@ -163,12 +168,12 @@ out:
     return 0;
 }
 
-int main () {
-    char buf[1000];
-
-    const char *json = buf;
-    size_t json_size = fread(buf, 1, sizeof buf, stdin);
-    process_task(&json, json + json_size, false, NULL, 0);
-    return 0;
+int
+glb_json_to_gsl(const char *json, size_t json_size, size_t *handled, struct glbOutput *output)
+{
+    const char *c = json;
+    int err = process_task(&c, json + json_size, false, NULL, 0, output);
+    if (handled != NULL)
+        *handled = c - json;
+    return err;
 }
-
