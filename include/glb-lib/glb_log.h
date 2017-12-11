@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-inline void
+static inline void
 glb_log(const char *fmt, ...)
 {
     va_list args;
