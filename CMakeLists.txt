@@ -23,3 +23,6 @@ add_library(glb-lib SHARED
     $<TARGET_OBJECTS:glb-lib-common>
     $<TARGET_OBJECTS:glb-lib-json-converter>
     $<TARGET_OBJECTS:glb-lib-list>)
+
+add_executable(json2gsl tools/json2gsl.c)
+target_link_libraries(json2gsl PUBLIC glb-lib)
