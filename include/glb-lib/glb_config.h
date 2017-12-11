@@ -2,7 +2,7 @@
 
 /* return error codes */
 typedef enum { glb_OK, glb_FAIL, glb_NOMEM, glb_LIMIT,
-               glb_IO_FAIL, glb_EOB
+               glb_IO_FAIL, glb_FORMAT
 } glb_err_codes;
 
 
