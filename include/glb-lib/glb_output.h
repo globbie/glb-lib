@@ -18,6 +18,9 @@ struct glbOutput
     int (*rtrim)(struct glbOutput *self,
                  size_t trim_size);
 
+    int (*putc)(struct glbOutput *self,
+                char ch);
+
     int (*write)(struct glbOutput *self,
                  const char *buf,
                  size_t buf_size);

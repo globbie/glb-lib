@@ -37,6 +37,18 @@ glbOutput_rtrim(struct glbOutput *self,
 }
 
 static int
+glbOutput_putc(struct glbOutput *self,
+               char ch)
+{
+    if (self->buf_size == self->capacity)
+        return glb_NOMEM;
+
+    self->buf[self->buf_size] = ch;
+    self->buf_size++;
+    return glb_OK;
+}
+
+static int
 glbOutput_write(struct glbOutput *self,
                 const char *buf,
                 size_t buf_size)
@@ -140,6 +152,7 @@ glbOutput_init(struct glbOutput *self,
     self->del = glbOutput_del;
     self->reset = glbOutput_reset;
     self->rtrim = glbOutput_rtrim;
+    self->putc = glbOutput_putc;
     self->write = glbOutput_write;
     self->write_state_path = glbOutput_write_state_path;
     self->write_file_content = glbOutput_write_file_content;
