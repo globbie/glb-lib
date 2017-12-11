@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main (int argc, const char *argv[])
+int main (int argc __attribute__((unused)), const char *argv[])
 {
     int exit_code = EXIT_FAILURE;
     struct glbOutput *input = NULL, *output = NULL;
