@@ -1,0 +1,9 @@
+{schema Knowdy gateway test scheme
+    {user {sid some session sid}}
+    (class A
+        [_gloss {ru Ру А} {en En A}]
+        (base BaseA))
+    (class B
+        [_gloss {ru Ру Б} {en En B}]
+        (base BaseB))
+}
