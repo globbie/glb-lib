@@ -16,5 +16,8 @@ set(CMAKE_C_FLAGS_PACKAGE "${CMAKE_C_FLAGS_RELEASE}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/glb-lib")
 
 add_library(glb-lib-list OBJECT src/list/list.c)
+add_library(glb-lib-output OBJECT src/glb_output.c)
 
-add_library(glb-lib SHARED $<TARGET_OBJECTS:glb-lib-list>)
+add_library(glb-lib SHARED
+    $<TARGET_OBJECTS:glb-lib-list>
+    $<TARGET_OBJECTS:glb-lib-output>)
