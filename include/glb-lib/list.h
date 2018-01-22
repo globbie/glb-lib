@@ -19,17 +19,97 @@ struct list_head {
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 
-void list_head_init(struct list_head *head);
-void list_add(struct list_head *head, struct list_head *entry);
-void list_add_tail(struct list_head *head, struct list_head *entry);
-void list_del(struct list_head *entry);
-void list_del_init(struct list_head *entry);
-void list_replace(struct list_head *old, struct list_head *new);
-void list_replace_init(struct list_head *old, struct list_head *new);
-void list_move(struct list_head *head, struct list_head *entry);
-void list_move_tail(struct list_head *head, struct list_head *entry);
-bool list_is_last(const struct list_head *head, const struct list_head *entry);
-bool list_is_empty(const struct list_head *head);
+static inline void
+__list_add(struct list_head *prev, struct list_head *next,
+           struct list_head *entry)
+{
+    next->prev = entry;
+    entry->next = next;
+    entry->prev = prev;
+    prev->next = entry;
+}
+
+static inline void
+__list_del(struct list_head *prev, struct list_head *next)
+{
+    next->prev = prev;
+    prev->next = next;
+}
+
+static inline void
+list_head_init(struct list_head *head)
+{
+    head->next = head;
+    head->prev = head;
+}
+
+static inline void
+list_add(struct list_head *head, struct list_head *entry)
+{
+    __list_add(head, head->next, entry);
+}
+
+static inline void
+list_add_tail(struct list_head *head, struct list_head *entry)
+{
+    __list_add(head->prev, head, entry);
+}
+
+static inline void
+list_del(struct list_head *entry)
+{
+    __list_del(entry->prev, entry->next);
+}
+
+static inline void
+list_del_init(struct list_head *entry)
+{
+    __list_del(entry->prev, entry->next);
+    list_head_init(entry);
+}
+
+static inline void
+list_replace(struct list_head *old, struct list_head *new)
+{
+    new->next = old->next;
+    new->next->prev = new;
+    new->prev = old->prev;
+    new->prev->next = new;
+}
+
+static inline void
+list_replace_init(struct list_head *old,
+                  struct list_head *new)
+{
+    list_replace(old, new);
+    list_head_init(old);
+}
+
+static inline void
+list_move(struct list_head *head, struct list_head *entry)
+{
+    list_del(entry);
+    list_add(head, entry);
+}
+
+static inline void
+list_move_tail(struct list_head *head, struct list_head *entry)
+{
+    list_del(entry);
+    list_add_tail(head, entry);
+}
+
+static inline bool
+list_is_last(const struct list_head *head, const struct list_head *entry)
+{
+    return entry->next == head;
+}
+
+static inline bool
+list_is_empty(const struct list_head *head)
+{
+    return head->next == head;
+}
 
 #define list_entry(ptr, type, member) \
     container_of(ptr, type, member)
