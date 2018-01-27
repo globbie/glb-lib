@@ -13,7 +13,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g3")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O3 -Werror")
 set(CMAKE_C_FLAGS_PACKAGE "${CMAKE_C_FLAGS_RELEASE}")
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/glb-lib")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_library(glb-lib-common OBJECT src/glb_output.c)
 add_library(glb-lib-json-converter OBJECT src/json-converter/glb_json_to_gsl.c)
