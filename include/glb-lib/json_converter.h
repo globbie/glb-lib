@@ -1,7 +1,7 @@
 #pragma once
 
-#include "glb_config.h"
-#include "glb_output.h"
+#include "config.h"
+#include "output.h"
 
 #include <stddef.h>
 
