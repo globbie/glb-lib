@@ -27,4 +27,4 @@ add_library(glb-lib SHARED
 add_executable(json2gsl tools/json2gsl.c)
 target_link_libraries(json2gsl PUBLIC glb-lib)
 
-add_subdirectory("${CMAKE_SOURCE_DIR}/src/options")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src/options")
