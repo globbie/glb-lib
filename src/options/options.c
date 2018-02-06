@@ -87,7 +87,6 @@ glb_parse_options(struct glbOption *options, int argc, const char **argv)
 
     int error_code;
 
-
     program_name = argv[0];
 
     for (size_t i = 1; i < (size_t) argc; ++i) {

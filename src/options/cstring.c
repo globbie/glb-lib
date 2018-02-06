@@ -6,11 +6,13 @@
 static int
 parse__(struct glbOption *self, const char *input, size_t input_len)
 {
-    self->data = malloc(input_len + 1);
-    if (!self->data) return -1;
+    char *data = malloc(input_len + 1);
+    if (!data) return -1;
 
-    memcpy(self->data, input, input_len);
-    ((char *) self->data)[input_len] = 0;
+    memcpy(data, input, input_len);
+    data[input_len] = '\0';
+
+    *(char **)self->data = data;
 
     return 0;
 }
@@ -18,14 +20,15 @@ parse__(struct glbOption *self, const char *input, size_t input_len)
 static int
 free__(struct glbOption *self)
 {
-    if (self->data) free(self->data);
+    char *data = *(char **) self->data;
+    if (data) free(data);
     return 0;
 }
 
 static int
 print__(struct glbOption *self)
 {
-    printf("\t--%s=%s\n", self->name, (char *) self->data);
+    printf("\t--%s=%s\n", self->name, *(char **) self->data);
     return 0;
 }
 
