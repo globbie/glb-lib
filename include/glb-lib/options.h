@@ -2,6 +2,7 @@
 
 #include "opts/option.h"
 #include "opts/help.h"
+#include "opts/cstring.h"
 
 #define GLB_OPTS_HELP { "help", sizeof("help") - 1, 'h', "Show help message", false, NULL, &kndHelpOptType }
 #define GLB_OPTS_TERMINATOR { NULL, 0, 0, NULL, false, NULL, NULL }
