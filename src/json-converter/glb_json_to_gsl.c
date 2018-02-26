@@ -1,6 +1,6 @@
-#include "glb_json_converter.h"
+#include "glb-lib/json_converter.h"
 
-#include "glb_config.h"
+#include "glb-lib/config.h"
 
 #include <assert.h>
 #include <stddef.h>

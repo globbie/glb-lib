@@ -1,6 +1,5 @@
-#include "glb_output.h"
-
-#include "glb_log.h"
+#include "glb-lib/output.h"
+#include "glb-lib/log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
