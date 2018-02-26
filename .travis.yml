@@ -1,0 +1,34 @@
+language: c
+addons:
+  apt:
+    sources:
+    - george-edison55-precise-backports
+    - ubuntu-toolchain-r-test
+    packages:
+    - cmake
+    - cmake-data
+    - gcc-4.8
+    - clang
+    - libzmq3-dev
+    - libmysqlclient-dev
+    - check
+    - libsubunit-dev
+dist: trusty
+compiler:
+- gcc
+- clang
+git:
+  submodules: false
+before_install:
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+install:
+- if [ "$CC" = "gcc" ]; then export CC="gcc-4.8"; fi
+before_script:
+- mkdir build
+- cd build
+- cmake ..
+script: make
+notifications:
+  slack:
+    secure: Hr5mXTFdtjxgH0SdV955L8m/nsSJAafTByT8wt9JYio7pcXxNzEe19kAKOgdHAgsr6JYfqXOroqGH9aEMxdEoA+6GUT0Dn782jYX6oaJG8UEGMlYoTX7zq55zltLpeyD57QxAMAkXaNbrzm4oHnZDoU254CvwyJ47uLS+4nxTi3l8aqOvdjLBhnUf7XnJsykjC6D/Zug2CrYFMH+n/4Ywh2t9h76ZxwmAHYsOuCGhfk9BFxjgmtBPhW74DirX2b3caAydE/bwK244rtrQmv6tQEoLKF81mgjR7+4ecwCp0b1X6X9JRJoz4dZSq819KQNiXha5Rw4XY2OVgL3MEddnffuGD+LMjL5CypjhdyLLfQyDbIgIvp5qf+saBNdieap3w9mH+2NijL8esKF1yGZUA8+8te4n1fl9z70sPTZoI9aXNi5gwQR/NmCZsYUpFHzAxhFSnYoVj3AyK5niTHEbIZLiiITwDAO1iLZGv6QG7ZSV9551kohDAXP0ZFbFtp1JRx4PXAv+ypk0zLSR86/aLe+OW6p4tp96xy26XDfDdpqGlIb3DVYkRENkvHQP1AA+3KZH0Ed0+n95IFfpLrQqLy1CC/tBoARSnzNvtzcdPGnxMcXIRCX3MVAXIGbvboNKm0N+Yr5uoPXVJtoc8z2CRfr8xn4IeWjI4Q43ckVgJU=
