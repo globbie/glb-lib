@@ -11,7 +11,6 @@
 #define DEBUG_OUTPUT_LEVEL_3 0
 #define DEBUG_OUTPUT_LEVEL_TMP 1
 
-
 static void
 glbOutput_del(struct glbOutput *self)
 {
@@ -32,6 +31,8 @@ glbOutput_rtrim(struct glbOutput *self,
     if (trim_size > self->buf_size) return glb_LIMIT;
 
     self->buf_size -= trim_size;
+    self->buf[self->buf_size] = '\0';
+
     return glb_OK;
 }
 
@@ -44,6 +45,7 @@ glbOutput_putc(struct glbOutput *self,
 
     self->buf[self->buf_size] = ch;
     self->buf_size++;
+    self->buf[self->buf_size] = '\0';
     return glb_OK;
 }
 
@@ -57,6 +59,7 @@ glbOutput_write(struct glbOutput *self,
 
     memcpy(self->buf + self->buf_size, buf, buf_size);
     self->buf_size += buf_size;
+    self->buf[self->buf_size] = '\0';
     return glb_OK;
 }
 
@@ -122,6 +125,7 @@ glbOutput_write_file_content(struct glbOutput *self,
 
     read_size = fread(self->buf + self->buf_size, 1, file_size, file_stream);
     self->buf_size += read_size;
+    self->buf[self->buf_size] = '\0';
 
     if (DEBUG_OUTPUT_LEVEL_3)
         glb_log("   ++ FILE \"%s\" read OK [size: %zu]\n",
@@ -174,6 +178,8 @@ glbOutput_new(struct glbOutput **output,
         free(self);
         return err;
     }
+
+    self->threshold = capacity * GLB_OUTPUT_THRESHOLD_RATIO;
 
     *output = self;
 

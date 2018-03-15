@@ -4,11 +4,14 @@
 
 #include <stddef.h>
 
+#define GLB_OUTPUT_THRESHOLD_RATIO 0.8
+
 struct glbOutput
 {
     char *buf;
     size_t buf_size;
     size_t capacity;
+    size_t threshold;
 
     /**********  interface methods  **********/
     void (*del)(struct glbOutput *self);
