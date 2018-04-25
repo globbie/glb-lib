@@ -62,6 +62,37 @@ glbOutput_write(struct glbOutput *self,
 }
 
 static int
+glbOutput_write_escaped(struct glbOutput *self,
+                        const char *buf,
+                        size_t buf_size)
+{
+    size_t free_space = self->capacity - self->buf_size;
+    size_t chunk_size = 0;
+    char *c = self->buf;
+    char *b;
+
+    for (size_t i = 0; i < buf_size; i++) {
+        b = buf + i;
+        if (chunk_size >= free_space)
+            return glb_NOMEM;
+
+        switch (*b) {
+        case '{':
+        case '}':
+        case '"':
+        case '\'':
+            break;
+        default:
+            *c = *b;
+            chunk_size++;
+        }
+    }
+    
+    self->buf_size += chunk_size;
+    return glb_OK;
+}
+
+static int
 glbOutput_write_state_path(struct glbOutput *self,
                            const char *state,
                            size_t state_size)
@@ -154,6 +185,7 @@ glbOutput_init(struct glbOutput *self,
     self->rtrim = glbOutput_rtrim;
     self->putc = glbOutput_putc;
     self->write = glbOutput_write;
+    self->write_escaped = glbOutput_write_escaped;
     self->write_state_path = glbOutput_write_state_path;
     self->write_file_content = glbOutput_write_file_content;
 

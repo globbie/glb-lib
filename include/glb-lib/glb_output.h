@@ -25,6 +25,10 @@ struct glbOutput
                  const char *buf,
                  size_t buf_size);
 
+    int (*write_escaped)(struct glbOutput *self,
+                         const char *buf,
+                         size_t buf_size);
+
     int (*write_state_path)(struct glbOutput *self,
                             const char *state,
                             size_t state_size);
