@@ -1,14 +1,17 @@
 #pragma once
 
-#include "glb_config.h"
+#include "config.h"
 
 #include <stddef.h>
+
+#define GLB_OUTPUT_THRESHOLD_RATIO 0.8
 
 struct glbOutput
 {
     char *buf;
     size_t buf_size;
     size_t capacity;
+    size_t threshold;
 
     /**********  interface methods  **********/
     void (*del)(struct glbOutput *self);
@@ -18,12 +21,11 @@ struct glbOutput
     int (*rtrim)(struct glbOutput *self,
                  size_t trim_size);
 
-    int (*putc)(struct glbOutput *self,
-                char ch);
-
     int (*write)(struct glbOutput *self,
                  const char *buf,
                  size_t buf_size);
+    int (*writec)(struct glbOutput *self,
+		  char ch);
 
     int (*write_escaped)(struct glbOutput *self,
                          const char *buf,

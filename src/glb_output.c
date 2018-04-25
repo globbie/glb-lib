@@ -1,6 +1,5 @@
-#include "glb_output.h"
-
-#include "glb_log.h"
+#include "glb-lib/output.h"
+#include "glb-lib/log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +10,6 @@
 #define DEBUG_OUTPUT_LEVEL_2 0
 #define DEBUG_OUTPUT_LEVEL_3 0
 #define DEBUG_OUTPUT_LEVEL_TMP 1
-
 
 static void
 glbOutput_del(struct glbOutput *self)
@@ -33,18 +31,21 @@ glbOutput_rtrim(struct glbOutput *self,
     if (trim_size > self->buf_size) return glb_LIMIT;
 
     self->buf_size -= trim_size;
+    self->buf[self->buf_size] = '\0';
+
     return glb_OK;
 }
 
 static int
-glbOutput_putc(struct glbOutput *self,
-               char ch)
+glbOutput_writec(struct glbOutput *self,
+		 char ch)
 {
     if (self->buf_size == self->capacity)
         return glb_NOMEM;
 
     self->buf[self->buf_size] = ch;
     self->buf_size++;
+    self->buf[self->buf_size] = '\0';
     return glb_OK;
 }
 
@@ -58,6 +59,7 @@ glbOutput_write(struct glbOutput *self,
 
     memcpy(self->buf + self->buf_size, buf, buf_size);
     self->buf_size += buf_size;
+    self->buf[self->buf_size] = '\0';
     return glb_OK;
 }
 
@@ -154,6 +156,7 @@ glbOutput_write_file_content(struct glbOutput *self,
 
     read_size = fread(self->buf + self->buf_size, 1, file_size, file_stream);
     self->buf_size += read_size;
+    self->buf[self->buf_size] = '\0';
 
     if (DEBUG_OUTPUT_LEVEL_3)
         glb_log("   ++ FILE \"%s\" read OK [size: %zu]\n",
@@ -183,7 +186,7 @@ glbOutput_init(struct glbOutput *self,
     self->del = glbOutput_del;
     self->reset = glbOutput_reset;
     self->rtrim = glbOutput_rtrim;
-    self->putc = glbOutput_putc;
+    self->writec = glbOutput_writec;
     self->write = glbOutput_write;
     self->write_escaped = glbOutput_write_escaped;
     self->write_state_path = glbOutput_write_state_path;
@@ -207,6 +210,8 @@ glbOutput_new(struct glbOutput **output,
         free(self);
         return err;
     }
+
+    self->threshold = capacity * GLB_OUTPUT_THRESHOLD_RATIO;
 
     *output = self;
 

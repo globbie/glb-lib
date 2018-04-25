@@ -1,5 +1,5 @@
-#include "glb_json_converter.h"
-#include "glb_output.h"
+#include <glb-lib/json_converter.h>
+#include <glb-lib/output.h>
 
 #include <stdio.h>
 #include <stdlib.h>

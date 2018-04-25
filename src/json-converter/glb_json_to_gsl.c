@@ -1,6 +1,6 @@
-#include "glb_json_converter.h"
+#include "glb-lib/json_converter.h"
 
-#include "glb_config.h"
+#include "glb-lib/config.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -28,11 +28,11 @@ process_task_array(const char **rec, const char *rec_end,
             break;
         case '[':
             if (!in_place) {
-                err = output->putc(output, '[');
+                err = output->writec(output, '[');
                 if (err) goto out;
                 err = output->write(output, tag, tag_size);
                 if (err) goto out;
-                err = output->putc(output, ' ');
+                err = output->writec(output, ' ');
                 if (err) goto out;
             }
             c++;
@@ -40,7 +40,7 @@ process_task_array(const char **rec, const char *rec_end,
             if (err) goto out;
             break;
         case ',':
-            err = output->putc(output, ' ');
+            err = output->writec(output, ' ');
             if (err) goto out;
             c++;
             err = process_task(&c, rec_end, in_change, NULL, 0, output);
@@ -48,7 +48,7 @@ process_task_array(const char **rec, const char *rec_end,
             break;
         case ']':
             if (!in_place)
-                err = output->putc(output, ']');
+                err = output->writec(output, ']');
             goto out;
         default:
             err = glb_FORMAT;
@@ -85,7 +85,7 @@ process_task(const char **rec, const char *rec_end,
         case ' ':
             if (in_tag) { err = glb_FORMAT; goto out; }  // error: tag contains spaces
             if (in_terminal_value) {
-                err = output->putc(output, *c);
+                err = output->writec(output, *c);
                 if (err) goto out;
             }
             break;
@@ -93,11 +93,11 @@ process_task(const char **rec, const char *rec_end,
             if (!in_value) {
                 // Starting opening \{ brace.  Ignore it or print the passed |tag|
                 if (!in_place) {
-                    err = output->putc(output, !in_change ? '{' : '(');
+                    err = output->writec(output, !in_change ? '{' : '(');
                     if (err) goto out;
                     err = output->write(output, tag, tag_size);
                     if (err) goto out;
-                    err = output->putc(output, ' ');
+                    err = output->writec(output, ' ');
                     if (err) goto out;
                 }
                 continue;
@@ -156,11 +156,11 @@ process_task(const char **rec, const char *rec_end,
             else if (in_value && !in_terminal_value) {
                 assert(in_tag == false);
 
-                err = output->putc(output, !in_change ? '{' : '(');
+                err = output->writec(output, !in_change ? '{' : '(');
                 if (err) goto out;
                 err = output->write(output, tag, tag_size);
                 if (err) goto out;
-                err = output->putc(output, ' ');
+                err = output->writec(output, ' ');
                 if (err) goto out;
                 // in_tag == false
                 // in_value == true
@@ -169,7 +169,7 @@ process_task(const char **rec, const char *rec_end,
             else if (in_value && in_terminal_value) {
                 if (in_tag) { err = glb_FORMAT; goto out; }
 
-                err = output->putc(output, !in_change ? '}' : ')');
+                err = output->writec(output, !in_change ? '}' : ')');
                 if (err) goto out;
                 // in_tag == false
                 in_value = false;
@@ -188,7 +188,7 @@ process_task(const char **rec, const char *rec_end,
             if (in_value) { err = glb_FORMAT; goto out; }
             if (in_terminal_value) { err = glb_FORMAT; goto out; }
 
-            err = output->putc(output, ' ');
+            err = output->writec(output, ' ');
             if (err) goto out;
             break;
         case '}':
@@ -197,13 +197,13 @@ process_task(const char **rec, const char *rec_end,
             if (in_terminal_value) { err = glb_FORMAT; goto out; }
 
             if (!in_place)
-                err = output->putc(output, !in_change ? '}' : ')');
+                err = output->writec(output, !in_change ? '}' : ')');
             goto out;
         default:
             if (in_tag)
                 tag_size++;
             else if (in_terminal_value) {
-                err = output->putc(output, *c);
+                err = output->writec(output, *c);
                 if (err) goto out;
             }
             else {
