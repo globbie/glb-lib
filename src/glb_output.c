@@ -70,8 +70,8 @@ glbOutput_write_escaped(struct glbOutput *self,
 {
     size_t free_space = self->capacity - self->buf_size;
     size_t chunk_size = 0;
-    char *c = self->buf;
-    char *b;
+    char *c = self->buf + self->buf_size;
+    const char *b;
 
     for (size_t i = 0; i < buf_size; i++) {
         b = buf + i;
@@ -86,6 +86,7 @@ glbOutput_write_escaped(struct glbOutput *self,
             break;
         default:
             *c = *b;
+            c++;
             chunk_size++;
         }
     }
