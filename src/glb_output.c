@@ -1,6 +1,8 @@
 #include "glb-lib/output.h"
 #include "glb-lib/log.h"
 
+#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +49,26 @@ glbOutput_writec(struct glbOutput *self,
     self->buf[self->buf_size] = ch;
     self->buf_size++;
     self->buf[self->buf_size] = '\0';
+    return glb_OK;
+}
+
+static int
+glbOutput_writef(struct glbOutput *self,
+                 const char *format,
+                 ...)
+{
+    int len;
+
+    va_list arg;
+    va_start(arg, format);
+    len = vsnprintf(self->buf + self->buf_size, self->capacity - self->buf_size, format, arg);
+    va_end(arg);
+
+    if (len < 0) return glb_IO_FAIL;
+    if ((size_t)len >= self->capacity - self->buf_size)
+        return glb_NOMEM;
+
+    self->buf_size += len;
     return glb_OK;
 }
 
@@ -189,6 +211,7 @@ glbOutput_init(struct glbOutput *self,
     self->reset = glbOutput_reset;
     self->rtrim = glbOutput_rtrim;
     self->writec = glbOutput_writec;
+    self->writef = glbOutput_writef;
     self->write = glbOutput_write;
     self->write_escaped = glbOutput_write_escaped;
     self->write_state_path = glbOutput_write_state_path;
