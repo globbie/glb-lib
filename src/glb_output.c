@@ -22,6 +22,7 @@ static void
 glbOutput_reset(struct glbOutput *self)
 {
     self->buf_size = 0;
+    self->buf[self->buf_size] = '\0';
 }
 
 static int
@@ -38,9 +39,9 @@ glbOutput_rtrim(struct glbOutput *self,
 
 static int
 glbOutput_writec(struct glbOutput *self,
-		 char ch)
+                 char ch)
 {
-    if (self->buf_size == self->capacity)
+    if (self->buf_size >= self->capacity - 1)
         return glb_NOMEM;
 
     self->buf[self->buf_size] = ch;
@@ -54,7 +55,7 @@ glbOutput_write(struct glbOutput *self,
                 const char *buf,
                 size_t buf_size)
 {
-    if (buf_size > self->capacity - self->buf_size)
+    if (buf_size > self->capacity - self->buf_size - 1)
         return glb_NOMEM;
 
     memcpy(self->buf + self->buf_size, buf, buf_size);
@@ -149,7 +150,7 @@ glbOutput_write_file_content(struct glbOutput *self,
 
     if (fseek(file_stream, 0L, SEEK_SET) != 0) { err = glb_IO_FAIL; goto final; }
 
-    if ((size_t)file_size > self->capacity - self->buf_size) { err = glb_NOMEM; goto final; }
+    if ((size_t)file_size > self->capacity - self->buf_size - 1) { err = glb_NOMEM; goto final; }
 
     if (DEBUG_OUTPUT_LEVEL_3)
         glb_log("  .. reading FILE \"%s\" [%ld] ...\n",
