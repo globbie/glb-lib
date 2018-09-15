@@ -107,6 +107,13 @@ glbOutput_write_escaped(struct glbOutput *self,
         case '"':
         case '\'':
             break;
+        case '\n':
+            *c = '\\';
+            c++;
+            *c = 'n';
+            c++;
+            chunk_size += 2;
+            break;
         default:
             *c = *b;
             c++;
