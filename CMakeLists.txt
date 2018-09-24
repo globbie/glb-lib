@@ -20,9 +20,12 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_library(glb-lib-common OBJECT src/glb_output.c)
 add_library(glb-lib-json-converter OBJECT src/json-converter/glb_json_to_gsl.c)
 
+add_library(glb-lib_static STATIC
+	$<TARGET_OBJECTS:glb-lib-common>
+	$<TARGET_OBJECTS:glb-lib-json-converter>)
 add_library(glb-lib SHARED
-    $<TARGET_OBJECTS:glb-lib-common>
-    $<TARGET_OBJECTS:glb-lib-json-converter>)
+	    $<TARGET_OBJECTS:glb-lib-common>
+	    $<TARGET_OBJECTS:glb-lib-json-converter>)
 install(TARGETS glb-lib DESTINATION usr/lib)
 
 add_executable(json2gsl tools/json2gsl.c)
