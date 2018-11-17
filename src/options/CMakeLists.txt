@@ -7,3 +7,6 @@ add_library(glb-lib-options OBJECT
     cstring.c
 )
 
+add_library(glb-lib-options_static STATIC
+       $<TARGET_OBJECTS:glb-lib-options>)
+
